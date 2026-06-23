@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 .streamlit/
+frontend/node_modules/
+frontend/dist/
+company_autocomplete_component/dist/

@@ -1,14 +1,39 @@
 # LangGraph Stock Analyzer
 
-A minimal Python app that uses LangGraph with an Ollama model (`gpt-oss:20b`) to analyze recent stock price action and enrich the result with Google News RSS context.
+A stock analysis application with a React frontend and a Python backend that uses LangGraph with a local Ollama model (`gpt-oss:20b`) to analyze stock price action for Indian markets and enrich the result with Google News RSS context.
 
 ## What it does
 
+- Searches NSE/BSE-listed companies from a local SQLite company catalog
 - Downloads recent OHLCV data for a ticker with `yfinance`
 - Pulls recent stock-related headlines through Google News RSS
-- Computes a few basic summary metrics
+- Computes summary metrics including trend direction and strength
 - Sends the structured snapshot to an Ollama-hosted LLM through LangGraph
-- Returns a concise stock analysis report
+- Returns a structured stock analysis report through a React UI
+
+## Architecture
+
+The project is split into two parts:
+
+1. React frontend
+	Located in `frontend/`
+
+	Responsibilities:
+
+	- company search UI
+	- dropdown result selection
+	- analysis trigger and result display
+
+2. Python backend
+	Located in `src/stock_analyzer/` and exposed through FastAPI in `src/stock_analyzer/api.py`
+
+	Responsibilities:
+
+	- NSE/BSE company lookup from a local SQLite database
+	- LangGraph analysis workflow
+	- Yahoo Finance price history fetches
+	- Google News RSS context fetches
+	- Ollama model calls
 
 ## How LangGraph is used
 
@@ -39,7 +64,7 @@ The graph starts at `START`, moves through the four nodes above, and ends at `EN
 
 ## APIs and libraries called
 
-This project does not call a direct exchange API such as Alpha Vantage or Polygon. Instead it currently uses Python libraries that fetch and normalize data for you.
+This project does not rely on a direct paid market-data vendor API. Instead it uses a mix of local catalog data and public library-backed sources.
 
 ### Stock price data
 
@@ -101,6 +126,16 @@ So the LLM call path is:
 - Ollama runs `gpt-oss:20b`
 - the returned text is stored in `analysis`
 
+### Company lookup data
+
+Company lookup is focused on Indian markets and uses a local SQLite database:
+
+- `src/stock_analyzer/india_symbols.db`
+
+The database is built from the NSE equity list plus curated BSE fallback entries using:
+
+- `scripts/build_india_symbol_db.py`
+
 ## Prerequisites
 
 - Python 3.10+
@@ -117,51 +152,48 @@ ollama pull gpt-oss:20b
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+cd frontend
+npm install
 ```
 
-## Run
+## Run backend
 
 ```bash
-python main.py --ticker AAPL --period 6mo --interval 1d
+.venv/bin/uvicorn api_main:app --host 0.0.0.0 --port 8000
 ```
 
-To include a company name in the research query:
+## Run frontend
 
 ```bash
-python main.py --ticker GOOGL --company-name Alphabet
+cd frontend
+npm run dev -- --host 0.0.0.0 --port 5173
 ```
 
-## UI
+Then open:
 
-Run the Streamlit interface:
+```text
+http://localhost:5173
+```
+
+## Build India company database
+
+If you need to rebuild the local NSE/BSE company lookup database:
 
 ```bash
-.venv/bin/streamlit run app.py
+.venv/bin/python scripts/build_india_symbol_db.py
 ```
 
-The UI lets you enter the stock ticker, optional company name, history window, and model, then starts the full LangGraph analysis flow.
+## Legacy files
 
-UI inputs map directly into the graph state:
+The repository still contains earlier Streamlit-era files such as `app.py` and `main.py`. They are no longer the primary intended UI path after the React/FastAPI migration.
 
-- ticker symbol
-- optional company name for better Google News queries
-- price history period
-- price interval
-- Ollama model name
+## Notes
 
-Before running the UI, ensure Ollama is serving the requested model locally:
+Before using analysis features, ensure Ollama is serving the requested model locally:
 
 ```bash
 ollama pull gpt-oss:20b
 ollama serve
 ```
-
-You can also override the model:
-
-```bash
-python main.py --ticker NVDA --model gpt-oss:20b
-```
-
-## Notes
 
 This project is for research and educational use only. It does not provide financial advice.
