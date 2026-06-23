@@ -11,6 +11,16 @@ A React + FastAPI stock analysis application that uses LangGraph with a local Ol
 - Sends the structured snapshot to an Ollama-hosted LLM through LangGraph
 - Returns a structured stock analysis report through a React UI
 
+## Screenshots
+
+### Home screen
+
+![Home screen](Screenshot%20at%202026-06-23%2020-21-46.png)
+
+### Analysis screen
+
+![Analysis screen](Screenshot%20at%202026-06-23%2020-21-59.png)
+
 ## Architecture
 
 The project is split into two parts:
