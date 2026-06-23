@@ -1,6 +1,6 @@
 # LangGraph Stock Analyzer
 
-A stock analysis application with a React frontend and a Python backend that uses LangGraph with a local Ollama model (`gpt-oss:20b`) to analyze stock price action for Indian markets and enrich the result with Google News RSS context.
+A React + FastAPI stock analysis application that uses LangGraph with a local Ollama model (`gpt-oss:20b`) to analyze Indian-market stocks and enrich the result with Google News RSS context.
 
 ## What it does
 
@@ -34,6 +34,17 @@ The project is split into two parts:
 	- Yahoo Finance price history fetches
 	- Google News RSS context fetches
 	- Ollama model calls
+
+	## Project structure
+
+	Key files and folders:
+
+	- `frontend/` — React app
+	- `src/stock_analyzer/api.py` — FastAPI endpoints
+	- `src/stock_analyzer/graph.py` — LangGraph workflow
+	- `src/stock_analyzer/india_symbols.db` — local NSE/BSE company catalog
+	- `scripts/build_india_symbol_db.py` — rebuilds the India company database
+	- `api_main.py` — backend entrypoint for Uvicorn
 
 ## How LangGraph is used
 
@@ -175,6 +186,12 @@ Then open:
 http://localhost:5173
 ```
 
+The frontend expects the backend to be reachable at:
+
+```text
+http://localhost:8000
+```
+
 ## Build India company database
 
 If you need to rebuild the local NSE/BSE company lookup database:
@@ -182,10 +199,6 @@ If you need to rebuild the local NSE/BSE company lookup database:
 ```bash
 .venv/bin/python scripts/build_india_symbol_db.py
 ```
-
-## Legacy files
-
-The repository still contains earlier Streamlit-era files such as `app.py` and `main.py`. They are no longer the primary intended UI path after the React/FastAPI migration.
 
 ## Notes
 
